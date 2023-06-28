@@ -3,9 +3,10 @@ import time
 import os
 
 
-# 从环境变量中读取主控端地址和端口
+# 从环境变量中读取主控端地址和端口以及节点验证密钥
 CONTROLLER_HOST = os.environ.get('CONTROLLER_HOST')
 CONTROLLER_PORT = os.environ.get('CONTROLLER_PORT')
+NODEID_KEY = os.environ.get('NODEID_KEY')
 
 # 获取本机的外网IPv4地址
 def get_public_ipv4():
@@ -26,7 +27,7 @@ while True:
     try:
         if is_idle:
             # 爬虫节点处于待机状态，向主控端请求任务
-            response = requests.get(f"http://{CONTROLLER_HOST}:{CONTROLLER_PORT}/assign_task?node_id={NODE_ID}")
+            response = requests.get(f"http://{CONTROLLER_HOST}:{CONTROLLER_PORT}/assign_task?node_id={NODE_ID}&node_id_key={NODEID_KEY}")
             if response.status_code == 200:
                 # 成功接收到任务
                 task = response.json()
@@ -39,11 +40,11 @@ while True:
                     # 将页面内容回传给主控端
                     data = response.text
                     requests.post(f"http://{CONTROLLER_HOST}:{CONTROLLER_PORT}/submit_result",
-                                  json={"task_id": task_id, "data": data})
+                                  json={"task_id": task_id, "node_id_key" : NODEID_KEY, "data": data})
                 else:
                     # 请求页面失败，将任务标记为失败
                     requests.post(f"http://{CONTROLLER_HOST}:{CONTROLLER_PORT}/mark_task_failed",
-                                  json={"task_id": task_id})
+                                  json={"task_id": task_id, "node_id_key" : NODEID_KEY,})
             else:
                 # 没有任务可分配，继续等待
                 time.sleep(1)
