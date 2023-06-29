@@ -35,7 +35,7 @@ while True:
                 url = task['url']
 
                 # 执行爬取任务
-                response = requests.get(url)
+                response = requests.get(url, timeout=6)
                 if response.status_code == 200:
                     # 将页面内容回传给主控端
                     data = response.text
