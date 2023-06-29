@@ -1,3 +1,5 @@
+import gzip
+import urllib.parse
 import requests
 import time
 import os
@@ -22,6 +24,13 @@ NODE_ID = get_public_ipv4()
 # 爬虫节点待机状态
 is_idle = True
 
+def compress_and_encode_data(data):
+    # 压缩数据
+    compressed_data = gzip.compress(data.encode('utf-8'))
+    # URL编码
+    encoded_data = urllib.parse.quote_plus(compressed_data)
+    return encoded_data
+
 # 循环接收任务并执行
 while True:
     try:
@@ -39,12 +48,10 @@ while True:
                 if response.status_code == 200:
                     # 将页面内容回传给主控端
                     data = response.text
-                    requests.post(f"http://{CONTROLLER_HOST}:{CONTROLLER_PORT}/nodes/submit_result",
-                                  json={"task_id": task_id, "node_id_key" : NODEID_KEY, "data": data})
+                    requests.post(f"http://{CONTROLLER_HOST}:{CONTROLLER_PORT}/nodes/submit_result?nodeid_key={NODEID_KEY}&task_id={task_id}&data={compress_and_encode_data(data)}")
                 else:
                     # 请求页面失败，将任务标记为失败
-                    requests.post(f"http://{CONTROLLER_HOST}:{CONTROLLER_PORT}/nodes/mark_task_failed",
-                                  json={"task_id": task_id, "node_id_key" : NODEID_KEY,})
+                    requests.post(f"http://{CONTROLLER_HOST}:{CONTROLLER_PORT}/nodes/mark_task_failed?task_id={task_id}&nodeid_key={NODEID_KEY}")
             else:
                 # 没有任务可分配，继续等待
                 time.sleep(3)
