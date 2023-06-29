@@ -48,7 +48,7 @@ while True:
                 if response.status_code == 200:
                     # 将页面内容回传给主控端
                     data = response.text
-                    requests.post(f"http://{CONTROLLER_HOST}:{CONTROLLER_PORT}/nodes/submit_result?nodeid_key={NODEID_KEY}&task_id={task_id}&data={compress_and_encode_data(data)}")
+                    requests.post(f"http://{CONTROLLER_HOST}:{CONTROLLER_PORT}/nodes/submit_result?nodeid_key={NODEID_KEY}&task_id={task_id}&result_data={compress_and_encode_data(data)}")
                 else:
                     # 请求页面失败，将任务标记为失败
                     requests.post(f"http://{CONTROLLER_HOST}:{CONTROLLER_PORT}/nodes/mark_task_failed?task_id={task_id}&nodeid_key={NODEID_KEY}")
