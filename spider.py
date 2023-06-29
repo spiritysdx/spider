@@ -1,7 +1,8 @@
 import base64
-import requests
 import time
 import os
+import lz4
+import requests
 
 
 # 从环境变量中读取主控端地址和端口以及节点验证密钥
@@ -25,8 +26,9 @@ is_idle = True
 
 # 编码函数
 def encode_data(data):
-    encoded_data = base64.b64encode(data.encode('utf-8'))
-    return encoded_data
+    compressed_text = lz4.frame.compress(data.encode())
+    encoded_text = base64.b64encode(compressed_text).decode()
+    return encoded_text
 
 # 循环接收任务并执行
 while True:
