@@ -24,10 +24,11 @@ NODE_ID = get_public_ipv4()
 # 爬虫节点待机状态
 is_idle = True
 
+# 压缩和编码函数
 def compress_and_encode_data(data):
     # 压缩数据
     compressed_data = zlib.compress(data.encode('utf-8'))
-    # Base64编码
+    # base64编码
     encoded_data = base64.b64encode(compressed_data).decode('utf-8')
     return encoded_data
 
