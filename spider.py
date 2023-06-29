@@ -27,7 +27,7 @@ while True:
     try:
         if is_idle:
             # 爬虫节点处于待机状态，向主控端请求任务
-            response = requests.get(f"http://{CONTROLLER_HOST}:{CONTROLLER_PORT}/assign_task?node_id={NODE_ID}&node_id_key={NODEID_KEY}")
+            response = requests.get(f"http://{CONTROLLER_HOST}:{CONTROLLER_PORT}/nodes/assign_task?node_id={NODE_ID}&node_id_key={NODEID_KEY}")
             if response.status_code == 200:
                 # 成功接收到任务
                 task = response.json()
@@ -39,18 +39,18 @@ while True:
                 if response.status_code == 200:
                     # 将页面内容回传给主控端
                     data = response.text
-                    requests.post(f"http://{CONTROLLER_HOST}:{CONTROLLER_PORT}/submit_result",
+                    requests.post(f"http://{CONTROLLER_HOST}:{CONTROLLER_PORT}/nodes/submit_result",
                                   json={"task_id": task_id, "node_id_key" : NODEID_KEY, "data": data})
                 else:
                     # 请求页面失败，将任务标记为失败
-                    requests.post(f"http://{CONTROLLER_HOST}:{CONTROLLER_PORT}/mark_task_failed",
+                    requests.post(f"http://{CONTROLLER_HOST}:{CONTROLLER_PORT}/nodes/mark_task_failed",
                                   json={"task_id": task_id, "node_id_key" : NODEID_KEY,})
             else:
                 # 没有任务可分配，继续等待
                 time.sleep(1)
         else:
             # 爬虫节点不处于待机状态，等待主控端重新连接
-            response = requests.get(f"http://{CONTROLLER_HOST}:{CONTROLLER_PORT}/heartbeat?node_id={NODE_ID}")
+            response = requests.get(f"http://{CONTROLLER_HOST}:{CONTROLLER_PORT}/nodes/heartbeat?node_id={NODE_ID}")
             if response.status_code != 200:
                 # 主控端失联，爬虫节点保持待机状态
                 is_idle = True
