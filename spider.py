@@ -1,4 +1,3 @@
-import zlib
 import base64
 import requests
 import time
@@ -24,12 +23,9 @@ NODE_ID = get_public_ipv4()
 # 爬虫节点待机状态
 is_idle = True
 
-# 压缩和编码函数
-def compress_and_encode_data(data):
-    # 压缩数据
-    compressed_data = zlib.compress(data.encode('utf-8'))
-    # base64编码
-    encoded_data = base64.b64encode(compressed_data).decode('utf-8')
+# 编码函数
+def encode_data(data):
+    encoded_data = base64.b64encode(data.encode('utf-8'))
     return encoded_data
 
 # 循环接收任务并执行
@@ -49,20 +45,20 @@ while True:
                 if response.status_code == 200:
                     # 将页面内容回传给主控端
                     data = response.text
-                    requests.post(f"http://{CONTROLLER_HOST}:{CONTROLLER_PORT}/nodes/submit_result?nodeid_key={NODEID_KEY}&task_id={task_id}&result_data={compress_and_encode_data(data)}")
+                    requests.post(f"http://{CONTROLLER_HOST}:{CONTROLLER_PORT}/nodes/submit_result?nodeid_key={NODEID_KEY}&task_id={task_id}&result_data={encode_data(data)}")
                 else:
                     # 请求页面失败，将任务标记为失败
                     requests.post(f"http://{CONTROLLER_HOST}:{CONTROLLER_PORT}/nodes/mark_task_failed?task_id={task_id}&nodeid_key={NODEID_KEY}")
             else:
                 # 没有任务可分配，继续等待
-                time.sleep(3)
+                time.sleep(2)
         else:
             # 爬虫节点不处于待机状态，等待主控端重新连接
             response = requests.get(f"http://{CONTROLLER_HOST}:{CONTROLLER_PORT}/nodes/heartbeat?node_id={NODE_ID}")
             if response.status_code != 200:
                 # 主控端失联，爬虫节点保持待机状态
                 is_idle = True
-                time.sleep(2)
+                time.sleep(5)
     except requests.exceptions.RequestException:
         # 发生网络异常，等待一段时间后重试
         time.sleep(3)
