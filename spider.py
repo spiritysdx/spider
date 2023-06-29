@@ -1,5 +1,5 @@
-import gzip
-import urllib.parse
+import zlib
+import base64
 import requests
 import time
 import os
@@ -26,9 +26,9 @@ is_idle = True
 
 def compress_and_encode_data(data):
     # 压缩数据
-    compressed_data = gzip.compress(data.encode('utf-8'))
-    # URL编码
-    encoded_data = urllib.parse.quote_plus(compressed_data)
+    compressed_data = zlib.compress(data.encode('utf-8'))
+    # Base64编码
+    encoded_data = base64.b64encode(compressed_data).decode('utf-8')
     return encoded_data
 
 # 循环接收任务并执行
