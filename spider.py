@@ -1,4 +1,5 @@
 import requests
+import random
 import time
 import os
 
@@ -45,16 +46,17 @@ while True:
                     # 请求页面失败，将任务标记为失败
                     requests.post(f"http://{CONTROLLER_HOST}:{CONTROLLER_PORT}/nodes/mark_task_failed",
                                   json={"task_id": task_id, "node_id_key" : NODEID_KEY,})
+                time.sleep(random.randint(1, 3))
             else:
                 # 没有任务可分配，继续等待
-                time.sleep(1)
+                time.sleep(random.randint(2, 5))
         else:
             # 爬虫节点不处于待机状态，等待主控端重新连接
             response = requests.get(f"http://{CONTROLLER_HOST}:{CONTROLLER_PORT}/nodes/heartbeat?node_id={NODE_ID}")
             if response.status_code != 200:
                 # 主控端失联，爬虫节点保持待机状态
                 is_idle = True
-                time.sleep(1)
+                time.sleep(random.randint(2, 5))
     except requests.exceptions.RequestException:
         # 发生网络异常，等待一段时间后重试
-        time.sleep(1)
+        time.sleep(random.randint(2, 5))
